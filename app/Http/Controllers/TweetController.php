@@ -13,7 +13,7 @@ class TweetController extends Controller
     public function index()
     {
         // liked のデータも合わせて取得するよう修正
-        $tweets = Tweet::with(['user', 'liked'])->latest()->get();
+        $tweets = Tweet::with(['user' => fn ($q) => $q->withCount('tweets'), 'liked','tags' ])->latest()->get();
         // dd($tweets);
        return view('tweets.index', compact('tweets'));
     }
@@ -32,11 +32,11 @@ class TweetController extends Controller
     public function store(Request $request)
     {
          $request->validate([
-      'tweet' => 'required|max:255',
+      'tweet' => 'required|max:255', 
     ]);
 
     $request->user()->tweets()->create($request->only('tweet'));
-
+   
       return redirect()->route('tweets.index');
     }
 
@@ -45,7 +45,7 @@ class TweetController extends Controller
      */
     public function show(Tweet $tweet)
     {
-        $tweet->load('comments');
+        $tweet->load(['comments', 'tags']); // tagsもロードしているか？
        return view('tweets.show', compact('tweet'));
      }
 
@@ -66,7 +66,7 @@ class TweetController extends Controller
       'tweet' => 'required|max:255',
     ]);
      $tweet->update($request->only('tweet'));
-
+    
     return redirect()->route('tweets.show', $tweet);
         
     }
@@ -104,11 +104,6 @@ public function search(Request $request)
 
   return view('tweets.search', compact('tweets'));
 }
-
-
-
-
-
 
 
 }

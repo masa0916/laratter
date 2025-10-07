@@ -12,6 +12,18 @@
           <a href="{{ route('tweets.index') }}" class="text-blue-500 hover:text-blue-700 mr-2">一覧に戻る</a>
           <p class="text-gray-800 dark:text-gray-300 text-lg">{{ $tweet->tweet }}</p>
           <p class="text-gray-600 dark:text-gray-400 text-sm">投稿者: {{ $tweet->user->name }}</p>
+
+@if ($tweet->tags->count())
+  <div class="mt-2">
+    <p>タグ:</p>
+    <div>
+      @foreach ($tweet->tags as $tag)
+        <a href="{{ route('tags.show', $tag->name) }}">#{{ $tag->name }}</a>
+      @endforeach
+    </div>
+  </div>
+@endif
+
           <div class="text-gray-600 dark:text-gray-400 text-sm">
             <p>作成日時: {{ $tweet->created_at->format('Y-m-d H:i') }}</p>
             <p>更新日時: {{ $tweet->updated_at->format('Y-m-d H:i') }}</p>
@@ -45,11 +57,22 @@
             <p class="text-gray-600 dark:text-gray-400 ml-4">comment {{ $tweet->comments->count() }}</p>
             <a href="{{ route('tweets.comments.create', $tweet) }}" class="text-blue-500 hover:text-blue-700 mr-2">コメントする</a>
           </div>
+          <!-- ここに条件付きリツイートボタンを挿入 -->
+          @if (auth()->check() && ! $tweet->isRetweetedBy(auth()->user()))
+          <!--  ここに追加 -->
+         <div class="flex mt-2">
+         <form action="{{ route('tweets.retweet', $tweet) }}" method="POST">
+         @csrf
+        <button type="submit" class="text-green-500 hover:text-green-700">リツイート</button>
+        </form>
+           </div>
+           @endif
           <!-- 🔽 追加 -->
           <div class="mt-4">
             @foreach ($tweet->comments as $comment)
+            <p>
             <a href="{{ route('tweets.comments.show', [$tweet, $comment]) }}">
-            <p>{{ $comment->comment }} <span class="text-gray-600 dark:text-gray-400 text-sm">{{ $comment->user->name }} {{ $comment->created_at->format('Y-m-d H:i') }}</span></p>
+            {{ $comment->comment }} <span class="text-gray-600 dark:text-gray-400 text-sm">{{ $comment->user->name }} {{ $comment->created_at->format('Y-m-d H:i') }}</span></a></p>
             @endforeach
           </div>
         </div>

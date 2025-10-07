@@ -46,8 +46,17 @@ it('allows authenticated users to create a tweet', function () {
   // Tweetを作成
   $tweetData = ['tweet' => 'This is a test tweet.'];
 
+  // 投稿前のツイート数を取得
+  $beforeCount = Tweet::count();
+
   // POSTリクエスト
   $response = $this->post('/tweets', $tweetData);
+
+// 投稿後のツイート数を取得
+  $afterCount = Tweet::count();
+
+  // 投稿数が1増えていることを確認
+  expect($afterCount)->toBe($beforeCount + 1);
 
   // データベースに保存されたことを確認
   $this->assertDatabaseHas('tweets', $tweetData);
